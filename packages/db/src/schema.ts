@@ -157,6 +157,25 @@ export type SalonSettings = {
   clientDataSharingBetweenSalons?: boolean; // доступ майстрів до даних клієнта з іншого салону
 };
 
+/**
+ * SMS-налаштування салону. Кожен салон може підключити власний SMS-провайдер
+ * (TurboSMS, SMSClub тощо). Облікові дані НЕ зберігаються тут: лише посилання
+ * на секрет (Supabase Vault), щоб токени не лежали відкритим текстом.
+ */
+export const salonSmsSettings = pgTable("salon_sms_settings", {
+  salonId: uuid("salon_id")
+    .primaryKey()
+    .references(() => salons.id, { onDelete: "cascade" }),
+  enabled: boolean("enabled").notNull().default(false),
+  /** Ідентифікатор адаптера з реєстру провайдерів, наприклад "turbosms" */
+  provider: text("provider"),
+  /** Альфанумерична назва відправника, затверджена провайдером */
+  senderName: text("sender_name"),
+  /** Посилання на секрет з API-ключем або токеном у Supabase Vault */
+  credentialsSecretRef: text("credentials_secret_ref"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").primaryKey().defaultRandom(),
   salonId: uuid("salon_id")
@@ -180,7 +199,12 @@ export const accounts = pgTable(
   "accounts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    phone: text("phone"),
+    /**
+     * Обов'язковий, у форматі E.164 (+380…). Основний ідентифікатор клієнта.
+     * Вхід через Google/Meta не створює особу без телефону: спершу крок «вкажіть номер».
+     */
+    phone: text("phone").notNull(),
+    /** Обов'язковий для власника салону при реєстрації (скидання пароля). Для клієнтів необов'язковий. */
     email: text("email"),
     fullName: text("full_name"),
     photoPath: text("photo_path"), // шлях у приватному сховищі, не публічний URL
