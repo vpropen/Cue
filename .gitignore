@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+dist/
+.turbo/
+out/
+
+# env and secrets
+.env
+.env.*
+!.env.example
+
+# logs / misc
+*.log
+.DS_Store
+coverage/
+*.tsbuildinfo
