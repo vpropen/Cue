@@ -11,7 +11,13 @@
   },
   "dependencies": {
     "@cue/availability": "workspace:*",
+    "@cue/core": "workspace:*",
     "@cue/db": "workspace:*",
+    "@cue/domain": "workspace:*",
+    "@cue/shared": "workspace:*",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.119.2",
+    "drizzle-orm": "^0.44.7",
     "next": "^15.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
