@@ -29,6 +29,13 @@
       "when": 1795389795614,
       "tag": "0003_thin_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795390035223,
+      "tag": "0004_rls_scope",
+      "breakpoints": true
     }
   ]
 }

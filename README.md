@@ -39,3 +39,15 @@ pnpm dev                    # http://localhost:3000
 
 Ручні міграції (наприклад, EXCLUDE-обмеження) створюються так:
 `pnpm --filter @cue/db drizzle-kit generate --custom --name=<назва>`.
+
+## Перевірка RLS (локально, на чистому PostgreSQL)
+
+Supabase вже має схему `auth`. Для локальної перевірки її імітують:
+
+```bash
+psql "$LOCAL_DB" -f packages/db/tests/supabase-stub.sql
+psql "$LOCAL_DB" -f packages/db/migrations/0000_strange_stick.sql   # далі 0001–0004 по порядку
+psql "$LOCAL_DB" -v ON_ERROR_STOP=1 -f packages/db/tests/rls.test.sql
+```
+
+Тест перевіряє 26 сценаріїв доступу: власник, адміністратор, майстри, клієнт, сторонній користувач і анонім. Запускати на порожній базі.
