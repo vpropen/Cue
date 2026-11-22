@@ -26,6 +26,7 @@ import {
   uniqueIndex,
   uuid,
   check,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -104,6 +105,15 @@ export const priceChangeStatus = pgEnum("price_change_status", [
   "pending",
   "approved",
   "rejected",
+]);
+
+/**
+ * Спосіб підтвердження номера: код у SMS (якщо салон має працюючий SMS-провайдер)
+ * або дзвінок адміністратора (якщо SMS немає).
+ */
+export const phoneVerificationMethod = pgEnum("phone_verification_method", [
+  "sms_code",
+  "admin_call",
 ]);
 
 export const subscriptionStatus = pgEnum("subscription_status", [
@@ -210,6 +220,14 @@ export const accounts = pgTable(
     photoPath: text("photo_path"), // шлях у приватному сховищі, не публічний URL
     /** Ідентифікатор користувача Supabase Auth, якщо вхід виконано */
     authUserId: uuid("auth_user_id"),
+    /** Коли і як підтверджено номер. Поки null — номер не підтверджено. */
+    phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
+    phoneVerificationMethod: phoneVerificationMethod("phone_verification_method"),
+    /** Якщо номер підтвердив адміністратор дзвінком — хто саме */
+    phoneVerifiedByStaffId: uuid("phone_verified_by_staff_id").references(
+      (): AnyPgColumn => staff.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -232,6 +250,27 @@ export const accountChannels = pgTable(
     linkedAt: timestamp("linked_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("account_channels_uq").on(t.channel, t.externalId)],
+);
+
+/**
+ * Одноразові коди підтвердження номера. Зберігається лише HMAC-хеш коду, не сам код.
+ * Одна активна спроба на номер і салон; старі записи чистяться фоновою задачею.
+ */
+export const phoneOtps = pgTable(
+  "phone_otps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    salonId: uuid("salon_id")
+      .notNull()
+      .references(() => salons.id, { onDelete: "cascade" }),
+    phone: text("phone").notNull(),
+    codeHash: text("code_hash").notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("phone_otps_lookup_idx").on(t.salonId, t.phone, t.createdAt)],
 );
 
 /** Картка клієнта у конкретному салоні. Телефон — основний ключ пошуку в салоні. */
@@ -273,7 +312,9 @@ export const staff = pgTable(
     salonId: uuid("salon_id")
       .notNull()
       .references(() => salons.id, { onDelete: "cascade" }),
-    accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
+    accountId: uuid("account_id").references((): AnyPgColumn => accounts.id, {
+      onDelete: "set null",
+    }),
     role: staffRole("role").notNull(),
     displayName: text("display_name").notNull(),
     photoPath: text("photo_path"),
