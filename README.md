@@ -51,3 +51,11 @@ psql "$LOCAL_DB" -v ON_ERROR_STOP=1 -f packages/db/tests/rls.test.sql
 ```
 
 Тест перевіряє 26 сценаріїв доступу: власник, адміністратор, майстри, клієнт, сторонній користувач і анонім. Запускати на порожній базі.
+
+Інтеграційні тести сервісів (`packages/core`) запускаються з `DATABASE_URL` на базі, де застосовано міграції 0000–0004:
+
+```bash
+DATABASE_URL="postgres://…" pnpm --filter @cue/core test
+```
+
+Без `DATABASE_URL` вони пропускаються.

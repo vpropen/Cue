@@ -1,0 +1,24 @@
+{
+  "name": "@cue/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cue/availability": "workspace:*",
+    "@cue/db": "workspace:*",
+    "@cue/domain": "workspace:*",
+    "@cue/shared": "workspace:*",
+    "drizzle-orm": "^0.44.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
