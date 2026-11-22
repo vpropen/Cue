@@ -76,10 +76,12 @@ export function canResendOtp(lastSentAt: Date | null, now: Date): boolean {
 }
 
 /**
- * Статус клієнта після підтвердження номера. Лише «очікує підтвердження»
- * переходить у «підтверджений без візитів»; інші статуси не змінюються.
+ * Статус клієнта після підтвердження адміністратором (дзвінок і відмітка в кабінеті).
+ * Підтвердження номера кодом або дзвінком НЕ змінює статус: новий клієнт
+ * залишається «очікує підтвердження», доки адміністратор не підтвердить запис.
+ * Лише «очікує» переходить у «підтверджений без візитів»; інші статуси не змінюються.
  */
-export function clientStatusAfterVerification(
+export function clientStatusAfterAdminConfirmation(
   current: "pending_confirmation" | "confirmed_no_visits" | "has_history",
 ): "pending_confirmation" | "confirmed_no_visits" | "has_history" {
   return current === "pending_confirmation" ? "confirmed_no_visits" : current;

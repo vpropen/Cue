@@ -3,7 +3,7 @@ import {
   canResendOtp,
   checkOtp,
   chooseVerificationMethod,
-  clientStatusAfterVerification,
+  clientStatusAfterAdminConfirmation,
   generateOtpCode,
   hashOtp,
   OTP_MAX_ATTEMPTS,
@@ -107,12 +107,12 @@ describe("canResendOtp", () => {
   });
 });
 
-describe("clientStatusAfterVerification", () => {
-  it("нового клієнта переводить у «підтверджений»", () => {
-    expect(clientStatusAfterVerification("pending_confirmation")).toBe("confirmed_no_visits");
+describe("clientStatusAfterAdminConfirmation", () => {
+  it("нового клієнта переводить у «підтверджений» після підтвердження адміністратором", () => {
+    expect(clientStatusAfterAdminConfirmation("pending_confirmation")).toBe("confirmed_no_visits");
   });
   it("інші статуси не змінює", () => {
-    expect(clientStatusAfterVerification("confirmed_no_visits")).toBe("confirmed_no_visits");
-    expect(clientStatusAfterVerification("has_history")).toBe("has_history");
+    expect(clientStatusAfterAdminConfirmation("confirmed_no_visits")).toBe("confirmed_no_visits");
+    expect(clientStatusAfterAdminConfirmation("has_history")).toBe("has_history");
   });
 });
